@@ -34,6 +34,7 @@ class PDFReaderApp:
         # Caixa de texto (lado direito)
         self.text_box = tk.Text(main_frame, wrap='word', height=25, width=90)
         self.text_box.tag_configure("highlight", underline=True, background="#ffffaa")
+        self.text_box.bind("<ButtonRelease-1>", self.on_text_click)
         self.text_box.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         # Interface
@@ -148,7 +149,8 @@ class PDFReaderApp:
                     re.search(r'[a-z]\.sc', line.lower())
                 ):
                     continue
-                    
+
+                #self.highlight_line_in_text(line)
                 self.engine.say(line)
 
             self.engine.runAndWait()
@@ -168,6 +170,16 @@ class PDFReaderApp:
 
             # Rolagem automática até a linha
             self.text_box.see(start_idx)
+    def on_text_click(self, event):
+        # Pega o índice da posição do clique, ex: "5.0" (linha 5, coluna 0)
+        index = self.text_box.index("@%d,%d" % (event.x, event.y))
+        line_number = int(index.split('.')[0])
+        
+        # Atualiza os campos página e linha
+        self.page_entry.delete(0, tk.END)
+        self.page_entry.insert(0, str(self.current_page + 1))  # +1 pois página é 1-based
+        self.line_entry.delete(0, tk.END)
+        self.line_entry.insert(0, str(line_number))
 
     def on_page_select(self, event):
         selection = event.widget.curselection()
@@ -202,21 +214,8 @@ class PDFReaderApp:
                 self.current_page = page
                 self.pause_reading()
                 self.display_page()
-
-                # Se a entrada de linha for válida, ir até essa linha no texto
-                try:
-                    target_line = int(self.line_entry.get()) - 1
-                    if target_line >= 0:
-                        lines = self.pages_text[self.current_page].split('\n')
-                        if target_line < len(lines):
-                            line_text = lines[target_line].strip()
-                            if line_text:
-                                self.highlight_line_in_text(line_text)
-                except ValueError:
-                    pass
         except ValueError:
             pass
-
 
 # Inicia a aplicação
 if __name__ == "__main__":
