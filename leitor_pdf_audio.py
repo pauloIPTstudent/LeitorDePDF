@@ -148,9 +148,8 @@ class PDFReaderApp:
                     re.search(r'[a-z]\.sc', line.lower())
                 ):
                     continue
-
-                #self.highlight_line_in_text(line)
-                self.engine.say(line)
+                    
+                self.engine.say(line).wait()  # Aguarda a fala terminar
 
             self.engine.runAndWait()
 
@@ -203,8 +202,21 @@ class PDFReaderApp:
                 self.current_page = page
                 self.pause_reading()
                 self.display_page()
+
+                # Se a entrada de linha for válida, ir até essa linha no texto
+                try:
+                    target_line = int(self.line_entry.get()) - 1
+                    if target_line >= 0:
+                        lines = self.pages_text[self.current_page].split('\n')
+                        if target_line < len(lines):
+                            line_text = lines[target_line].strip()
+                            if line_text:
+                                self.highlight_line_in_text(line_text)
+                except ValueError:
+                    pass
         except ValueError:
             pass
+
 
 # Inicia a aplicação
 if __name__ == "__main__":
