@@ -149,7 +149,7 @@ class PDFReaderApp:
                 ):
                     continue
                     
-                self.engine.say(line).wait()  # Aguarda a fala terminar
+                self.engine.say(line)
 
             self.engine.runAndWait()
 
